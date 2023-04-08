@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mymongo
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  serviceName: mongo-headless
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: mongo-state
+        image: mongo
+        livenessProbe:
+          exec:
+            command:
+            - ls
+        env :
+        - name : MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name : mongo-state-secret
+              key : mongo-user
+        - name : MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name : mongo-state-secret
+              key : mongo-password
+        command: ["/bin/sh"]
+        args: ["-c", "mongod --replSet=rs0 --bind_ip_all"]
+        ports:
+        - containerPort: 27017
+          name: mongo
+        volumeMounts:
+          - name: www
+            mountPath: /data/db
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi

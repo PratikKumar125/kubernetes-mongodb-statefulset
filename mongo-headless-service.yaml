@@ -1,0 +1,16 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name:  mongo-headless
+spec:
+  selector:
+    app: myapp
+  clusterIP: None
+  ports:
+  - name:  mongo
+    port:  27017
+    targetPort:  27017
+
+
+# mongodb://mongo-0.mongo,mongo-1.mongo,mongo-2.mongo:27017/dbname_?'
+# "mongodb://127.0.0.1:27017,127.0.0.1:27018/mydb?connect=replica_set"
